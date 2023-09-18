@@ -1,3 +1,6 @@
 CSC 216,Software Development Fundamentals,601,3,jctetter,A
 CSC 217,Software Development Fundamentals Lab,601,1,sesmith5,A
+CSC 116,Intro to Programming - Java,002,3,spbalik,MW,1120,1310
+CSC 230,C and Software Tools,001,3,dbsturgi,MW,1145,1300
+Exercise,UMTHF,800,900,cardio days 
 CSC 226,Discrete Mathematics for Computer Scientists,001,3,tmbarnes,MWF,935,1025
