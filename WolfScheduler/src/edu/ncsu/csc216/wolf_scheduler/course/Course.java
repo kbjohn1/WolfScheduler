@@ -8,7 +8,7 @@ package edu.ncsu.csc216.wolf_scheduler.course;
  * 
  * @author Kevin John
  */
-public class Course {
+public class Course extends Activity {
 
 	/**
 	 * minimum name length described as a constant integer
@@ -50,32 +50,14 @@ public class Course {
 	 */
 	private static final int MIN_CREDITS = 1;
 
-	/**
-	 * upper hour described as a constant integer
-	 */
-	private static final int UPPER_HOUR = 24;
-
-	/**
-	 * upper minute described as a constant integer
-	 */
-	private static final int UPPER_MINUTE = 60;
-
 	/** Course's name. */
 	private String name;
-	/** Course's title. */
-	private String title;
 	/** Course's section. */
 	private String section;
 	/** Course's credit hours */
 	private int credits;
 	/** Course's instructor */
 	private String instructorId;
-	/** Course's meeting days */
-	private String meetingDays;
-	/** Course's starting time */
-	private int startTime;
-	/** Course's ending time */
-	private int endTime;
 
 	/**
 	 * Returns the Course's name.
@@ -87,9 +69,25 @@ public class Course {
 	}
 
 	/**
-	 * Set's the Course's name.
-	 * 
-	 * @param name the name to set
+	 * Sets the name of the course, following specific validation rules.
+	 *
+	 * @param name The name of the course to be set. It should consist of two parts
+	 *             separated by a space: a prefix and a numeric representation. -
+	 *             The prefix must contain only letters and digits. - The numeric
+	 *             representation must contain exactly DIGIT_COUNT digits. - The
+	 *             combined length of the prefix and numeric representation must be
+	 *             within the range of MIN_NAME_LENGTH and MAX_NAME_LENGTH
+	 *             (inclusive).
+	 *
+	 * @throws IllegalArgumentException If the provided name does not meet the
+	 *                                  validation criteria: - It is empty or null.
+	 *                                  - It does not contain two parts separated by
+	 *                                  a space. - The prefix or numeric
+	 *                                  representation contains illegal characters.
+	 *                                  - The length of the prefix or numeric
+	 *                                  representation is outside the specified
+	 *                                  bounds. - The name does not contain a space
+	 *                                  separating the two parts.
 	 */
 	private void setName(String name) {
 		// check if name is empty or null
@@ -136,45 +134,8 @@ public class Course {
 			throw new IllegalArgumentException("Invalid course name.");
 		}
 
-//		boolean illegalChar = false;
-//		for (int i = 0; i < name.length(); i++) {
-//			if (Character.isLetterOrDigit(name.charAt(i)) ) {
-//				illegalChar = true;
-//			}
-//			if (illegalChar) {
-//				throw new IllegalArgumentException("Invalid course name.");
-//			}
-//			
-//		}
-
 		// if all tests pass, set the variable
 		this.name = name;
-	}
-
-	/**
-	 * Gets the Course's title.
-	 * 
-	 * @return the title
-	 */
-	public String getTitle() {
-		return title;
-	}
-
-	/**
-	 * Sets the Course's title
-	 * 
-	 * @param title the title to set
-	 */
-	public void setTitle(String title) {
-		// checks for equality of title
-		if (title == null || "".equals(title)) {
-			throw new IllegalArgumentException("Invalid title.");
-		}
-		// checks empty or null object
-		if (isEmptyChecker(title)) {
-			throw new IllegalArgumentException("Invalid title.");
-		}
-		this.title = title;
 	}
 
 	/**
@@ -187,9 +148,15 @@ public class Course {
 	}
 
 	/**
-	 * Sets the Course's section
-	 * 
-	 * @param section the section to set
+	 * Sets the section of the course, following specific validation rules.
+	 *
+	 * @param section The section of the course to be set. It should consist of
+	 *                exactly SECTION_LENGTH digits.
+	 *
+	 * @throws IllegalArgumentException If the provided section does not meet the
+	 *                                  validation criteria: - It is empty or null.
+	 *                                  - It does not contain exactly SECTION_LENGTH
+	 *                                  digits. - It contains non-digit characters.
 	 */
 	public void setSection(String section) {
 		// checks for empty or null section string
@@ -220,9 +187,17 @@ public class Course {
 	}
 
 	/**
-	 * Sets the Course's credits
-	 * 
-	 * @param credits the credits to set
+	 * Sets the number of credits associated with the course, following specific
+	 * validation rules.
+	 *
+	 * @param credits The number of credits to be set. It should be within the
+	 *                allowable range defined by MIN_CREDITS and MAX_CREDITS
+	 *                (inclusive).
+	 *
+	 * @throws IllegalArgumentException If the provided credits do not meet the
+	 *                                  validation criteria: - It is empty or null.
+	 *                                  - It falls outside the allowable range
+	 *                                  specified by MIN_CREDITS and MAX_CREDITS.
 	 */
 	public void setCredits(int credits) {
 		// checks if the credits variable is empty or null
@@ -246,9 +221,13 @@ public class Course {
 	}
 
 	/**
-	 * Sets the Course's instructor ID
-	 * 
-	 * @param instructorId the instructorId to set
+	 * Sets the instructor's ID associated with the course.
+	 *
+	 * @param instructorId The instructor's ID to be set. It should not be empty or
+	 *                     null.
+	 *
+	 * @throws IllegalArgumentException If the provided instructorId is empty or
+	 *                                  null.
 	 */
 	public void setInstructorId(String instructorId) {
 		// checks if instructorID is empty or null
@@ -257,177 +236,6 @@ public class Course {
 		}
 		// if flow control is not transfered, instructorId is set
 		this.instructorId = instructorId;
-	}
-
-	/**
-	 * Gets the Course's meeting days
-	 * 
-	 * @return the meetingDays
-	 */
-	public String getMeetingDays() {
-		return meetingDays;
-	}
-
-	/**
-	 * Sets the Course's meeting days. Initializes meetingDays startTime and endTime
-	 * based on common requirements
-	 * 
-	 * @param meetingDays the meetingDays to set
-	 * @param startTime   int storing the start time
-	 * @param endTime     int storing the end time
-	 */
-	public void setMeetingDaysAndTime(String meetingDays, int startTime, int endTime) {
-		// checks if the given parameters are empty or null
-		if (isEmptyChecker(meetingDays) || isEmptyChecker("" + startTime) || isEmptyChecker("" + endTime)) {
-			throw new IllegalArgumentException("Invalid meeting days and times.");
-		}
-		// if meeting day A, meeting time must not be listed. order flip to avoid null
-		// exceptions with an empty meetingDays
-		if ("A".equals(meetingDays)) {
-			if (startTime != 0 || endTime != 0) {
-				throw new IllegalArgumentException("Invalid meeting days and times.");
-			}
-			this.meetingDays = meetingDays;
-			this.startTime = 0;
-			this.endTime = 0;
-		} else {
-			// holds letter count for each weekday letter
-			int letterCountM = 0, letterCountT = 0, letterCountW = 0, letterCountH = 0, letterCountF = 0;
-
-			// loops through all characters in meetingDays and increments weekday letter
-			// counter if a letter is found
-			for (int i = 0; i < meetingDays.length(); i++) {
-				if ('M' == meetingDays.charAt(i)) {
-					letterCountM++;
-				}
-				if ('T' == meetingDays.charAt(i)) {
-					letterCountT++;
-				}
-				if ('W' == meetingDays.charAt(i)) {
-					letterCountW++;
-				}
-				if ('H' == meetingDays.charAt(i)) {
-					letterCountH++;
-				}
-				if ('F' == meetingDays.charAt(i)) {
-					letterCountF++;
-				}
-				if (!('M' == meetingDays.charAt(i)) && !('T' == meetingDays.charAt(i))
-						&& !('W' == meetingDays.charAt(i)) && !('H' == meetingDays.charAt(i))
-						&& !('F' == meetingDays.charAt(i))) {
-					throw new IllegalArgumentException("Invalid meeting days and times.");
-				}
-			}
-			if (letterCountM > 1 || letterCountT > 1 || letterCountW > 1 || letterCountH > 1 || letterCountF > 1) {
-				throw new IllegalArgumentException("Invalid meeting days and times.");
-			}
-			// break apart startTime and endTime into hours and minutes
-			int startHour = startTime / 100;
-			int endHour = endTime / 100;
-
-			int startMin = startTime % 100;
-			int endMin = endTime % 100;
-			// boundary tests for start and end times
-			if (startHour < 0 || startHour >= UPPER_HOUR) {
-				throw new IllegalArgumentException("Invalid meeting days and times.");
-			}
-			if (startMin < 0 || startMin >= UPPER_MINUTE) {
-				throw new IllegalArgumentException("Invalid meeting days and times.");
-			}
-			if (endHour < 0 || endHour >= UPPER_HOUR) {
-				throw new IllegalArgumentException("Invalid meeting days and times.");
-			}
-			if (endMin < 0 || endMin >= UPPER_MINUTE) {
-				throw new IllegalArgumentException("Invalid meeting days and times.");
-			}
-			if (endTime < startTime) {
-				throw new IllegalArgumentException("Invalid meeting days and times.");
-			}
-		}
-		// if flow control is not transfered, meeting days is set
-		this.meetingDays = meetingDays;
-		this.startTime = startTime;
-		this.endTime = endTime;
-	}
-
-	/**
-	 * Gets the Course's starting time
-	 * 
-	 * @return the startTime
-	 */
-	public int getStartTime() {
-		return startTime;
-	}
-
-	/**
-	 * Gets the Course's end time
-	 * 
-	 * @return the endTime
-	 */
-	public int getEndTime() {
-		return endTime;
-	}
-
-	/**
-	 * gets the meeting days and times for a course and returns it as a string
-	 * 
-	 * @return a string describing what days and what time a course is meeting
-	 *         unless it is arranged
-	 */
-	public String getMeetingString() {
-		String getMeetingString;
-
-		getMeetingString = "" + meetingDays + " " + getTimeString(startTime) + "-" + getTimeString(endTime);
-
-		if (!"A".equals(meetingDays)) {
-			return getMeetingString;
-		} else {
-			return "Arranged";
-		}
-	}
-
-	/**
-	 * converts military to standard time
-	 * 
-	 * @param time the time value inputted for either start or end time
-	 * @return standard time with AM or PM
-	 */
-	private String getTimeString(int time) {
-		// military to standard hours. makes sure something like 15oclock gets turned to
-		// 3 o'clock
-		int hours = time / 100;
-		if (hours > 12) {
-			hours -= 12;
-		}
-
-		// military to standard minutes. 0 minutes gets converted to 00
-		int minutes = time % 100;
-		String doubleZero = "";
-		if (minutes == 0) {
-			doubleZero = "0";
-		} else {
-			doubleZero = "";
-		}
-
-		// checks for AM or PM
-		String amOrPm;
-		if (time < 1159) {
-			amOrPm = "AM";
-		} else {
-			amOrPm = "PM";
-		}
-
-		return "" + hours + ":" + minutes + doubleZero + amOrPm;
-	}
-
-	/**
-	 * Checks if a method's string parameter is empty or null
-	 * 
-	 * @param value string value from a method
-	 * @return whether or not the inputed string parameter is empty or null
-	 */
-	private boolean isEmptyChecker(String value) {
-		return value == null || value.length() == 0 || value.isEmpty();
 	}
 
 	/**
@@ -444,12 +252,11 @@ public class Course {
 	 */
 	public Course(String name, String title, String section, int credits, String instructorId, String meetingDays,
 			int startTime, int endTime) {
+		super(title, meetingDays, startTime, endTime);
 		setName(name);
-		setTitle(title);
 		setSection(section);
 		setCredits(credits);
 		setInstructorId(instructorId);
-		setMeetingDaysAndTime(meetingDays, startTime, endTime);
 	}
 
 	/**
@@ -468,53 +275,98 @@ public class Course {
 	}
 
 	/**
-	 * Generates a hashCode for Course using all fields
+	 * Returns a comma separated value String of all Course fields.
 	 * 
-	 * @return hashCode for Course
+	 * @return String representation of Course
 	 */
 	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + credits;
-		result = prime * result + endTime;
-		result = prime * result + ((instructorId == null) ? 0 : instructorId.hashCode());
-		result = prime * result + ((meetingDays == null) ? 0 : meetingDays.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((section == null) ? 0 : section.hashCode());
-		result = prime * result + startTime;
-		result = prime * result + ((title == null) ? 0 : title.hashCode());
-		return result;
+	public String toString() {
+		if ("A".equals(getMeetingDays())) {
+			return name + "," + getTitle() + "," + section + "," + credits + "," + instructorId + ","
+					+ getMeetingDays();
+		}
+		return name + "," + getTitle() + "," + section + "," + credits + "," + instructorId + "," + getMeetingDays()
+				+ "," + getStartTime() + "," + getEndTime();
 	}
 
 	/**
-	 * Compares a given object to this object for equality on all fields.
-	 * 
-	 * @param obj the Object to compare
-	 * @return true if the objects are the same on all fields
+	 * returns an array of length 4 containing the Course name, section, title, and
+	 * meeting string.
 	 */
+	@Override
+	public String[] getShortDisplayArray() {
+		String[] shortDisplayArray = { getName(), getSection(), getTitle(), getMeetingString() };
+		return shortDisplayArray;
+	}
+
+	/**
+	 * returns an array of length 7 containing the Course name, section, title,
+	 * credits, instructorId, meeting string, empty string (for a field that Event
+	 * will have that Course does not).
+	 * 
+	 */
+	@Override
+	public String[] getLongDisplayArray() {
+		String[] longDisplayArray = { getName(), getSection(), getTitle(), getCredits() + "", getInstructorId(),
+				getMeetingString(), "" };
+		return longDisplayArray;
+	}
+
+	@Override
+	public void setMeetingDaysAndTime(String meetingDays, int startTime, int endTime) {
+		for (int i = 0; i < meetingDays.length(); i++) {
+			char letter = meetingDays.charAt(i);
+			if (!(letter == 'M' || letter == 'T' || letter == 'W' || letter == 'H' || letter == 'F'
+					|| letter == 'A' && meetingDays.length() == 1)) {
+				throw new IllegalArgumentException("Invalid meeting days and times.");
+			}
+
+		}
+		super.setMeetingDaysAndTime(meetingDays, startTime, endTime);
+	}
+
+	/**
+	 * checks for duplicate courses
+	 * 
+	 * @param activity - activity superclass
+	 * @return true if a duplicate is found
+	 */
+	public boolean isDuplicate(Activity activity) {
+		if (activity instanceof Course) {
+			Course course = (Course) activity;
+			if (course.getName().equals(name)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + credits;
+		result = prime * result + ((instructorId == null) ? 0 : instructorId.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((section == null) ? 0 : section.hashCode());
+		return result;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		Course other = (Course) obj;
 		if (credits != other.credits)
 			return false;
-		if (endTime != other.endTime)
-			return false;
 		if (instructorId == null) {
 			if (other.instructorId != null)
 				return false;
 		} else if (!instructorId.equals(other.instructorId))
-			return false;
-		if (meetingDays == null) {
-			if (other.meetingDays != null)
-				return false;
-		} else if (!meetingDays.equals(other.meetingDays))
 			return false;
 		if (name == null) {
 			if (other.name != null)
@@ -526,28 +378,7 @@ public class Course {
 				return false;
 		} else if (!section.equals(other.section))
 			return false;
-		if (startTime != other.startTime)
-			return false;
-		if (title == null) {
-			if (other.title != null)
-				return false;
-		} else if (!title.equals(other.title))
-			return false;
 		return true;
-	}
-
-	/**
-	 * Returns a comma separated value String of all Course fields.
-	 * 
-	 * @return String representation of Course
-	 */
-	@Override
-	public String toString() {
-		if ("A".equals(meetingDays)) {
-			return name + "," + title + "," + section + "," + credits + "," + instructorId + "," + meetingDays;
-		}
-		return name + "," + title + "," + section + "," + credits + "," + instructorId + "," + meetingDays + ","
-				+ startTime + "," + endTime;
 	}
 
 }

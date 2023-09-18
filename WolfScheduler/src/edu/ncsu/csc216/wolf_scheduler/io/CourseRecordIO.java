@@ -5,9 +5,6 @@ package edu.ncsu.csc216.wolf_scheduler.io;
 
 import java.io.FileNotFoundException;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -70,29 +67,14 @@ public class CourseRecordIO {
 	}
 
 	/**
-	 * Writes the given list of Courses to
-	 * 
-	 * @param fileName file to write schedule of Courses to
-	 * @param courses  list of Courses to write
-	 * @throws IOException if cannot write to file
-	 */
-	public static void writeCourseRecords(String fileName, ArrayList<Course> courses) throws IOException {
-		PrintStream fileWriter = new PrintStream(new File(fileName));
-
-		for (int i = 0; i < courses.size(); i++) {
-			fileWriter.println(courses.get(i).toString());
-		}
-
-		fileWriter.close();
-
-	}
-
-	/**
-	 * reads course from file and creates course objects
-	 * 
-	 * @param fileName file name
-	 * @return null
-	 * @throws FileNotFoundException if file is not found
+	 * Reads course information from a file and creates a Course object.
+	 *
+	 * @param fileName The name of the file containing course information.
+	 * @return A Course object constructed from the information in the file.
+	 * @throws FileNotFoundException    If the specified file cannot be found.
+	 * @throws IllegalArgumentException If the input format in the file is invalid
+	 *                                  or if there are any other exceptions during
+	 *                                  file reading.
 	 */
 	private static Course readCourse(String fileName) throws FileNotFoundException {
 		try {
@@ -140,8 +122,7 @@ public class CourseRecordIO {
 			// Catch any exceptions and throw a new IllegalArgumentException
 			throw new IllegalArgumentException("Invalid input format", e);
 		}
-		
-		
+
 //		try {
 //			Scanner fileReader = new Scanner(fileName);
 //			fileReader.useDelimiter(",");
@@ -174,6 +155,6 @@ public class CourseRecordIO {
 //			// Catch any exceptions and throw a new IllegalArgumentException
 //			throw new IllegalArgumentException("Invalid input format", e);
 //		}
-	} 
+	}
 
 }

@@ -3,7 +3,10 @@ package edu.ncsu.csc216.wolf_scheduler.scheduler;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import edu.ncsu.csc216.wolf_scheduler.course.Activity;
 import edu.ncsu.csc216.wolf_scheduler.course.Course;
+import edu.ncsu.csc216.wolf_scheduler.course.Event;
+import edu.ncsu.csc216.wolf_scheduler.io.ActivityRecordIO;
 import edu.ncsu.csc216.wolf_scheduler.io.CourseRecordIO;
 
 /**
@@ -20,7 +23,7 @@ import edu.ncsu.csc216.wolf_scheduler.io.CourseRecordIO;
 public class WolfScheduler {
 
 	/**
-	 * holds the catalog in an array list
+	 * holds the course catalog in an array list
 	 */
 	ArrayList<Course> catalog;
 
@@ -28,7 +31,7 @@ public class WolfScheduler {
 	 * holds the schedule in an array list
 	 */
 
-	ArrayList<Course> schedule;
+	ArrayList<Activity> schedule;
 
 	/**
 	 * name for schedule, default My Schedule
@@ -36,14 +39,18 @@ public class WolfScheduler {
 	String title;
 
 	/**
-	 * WolfScheduler constructor
-	 * 
-	 * @param fileName file name that should be read in and stored in array list
+	 * Constructs a WolfScheduler object by reading course information from a file.
+	 *
+	 * @param fileName The name of the file containing course information to
+	 *                 initialize the catalog.
+	 * @throws IllegalArgumentException If the specified file cannot be found or if
+	 *                                  there are any other exceptions during file
+	 *                                  reading.
 	 */
 	public WolfScheduler(String fileName) {
 
 		catalog = new ArrayList<Course>();
-		schedule = new ArrayList<Course>();
+		schedule = new ArrayList<Activity>();
 		title = "My Schedule";
 
 		try {
@@ -60,13 +67,17 @@ public class WolfScheduler {
 	 *         section, and title.
 	 */
 	public String[][] getCourseCatalog() {
-		String[][] getCourseCatalog = new String[catalog.size()][3];
+		String[][] courseCatalog = new String[catalog.size()][4];
+
 		for (int i = 0; i < catalog.size(); i++) {
-			getCourseCatalog[i][0] = catalog.get(i).getName();
-			getCourseCatalog[i][1] = catalog.get(i).getSection();
-			getCourseCatalog[i][2] = catalog.get(i).getTitle();
+			Course a = catalog.get(i);
+			courseCatalog[i][0] = a.getShortDisplayArray()[0];
+			courseCatalog[i][1] = a.getShortDisplayArray()[1];
+			courseCatalog[i][2] = a.getShortDisplayArray()[2];
+			courseCatalog[i][3] = a.getShortDisplayArray()[3];
 		}
-		return getCourseCatalog;
+
+		return courseCatalog;
 	}
 
 	/**
@@ -75,15 +86,18 @@ public class WolfScheduler {
 	 * @return A 2D array where each row represents a scheduled course with columns
 	 *         for name, section, and title.
 	 */
-	public String[][] getScheduledCourses() {
+	public String[][] getScheduledActivities() {
 
-		String[][] getScheduledCourses = new String[schedule.size()][3];
+		String[][] getScheduledActivities = new String[schedule.size()][4];
 		for (int i = 0; i < schedule.size(); i++) {
-			getScheduledCourses[i][0] = schedule.get(i).getName();
-			getScheduledCourses[i][1] = schedule.get(i).getSection();
-			getScheduledCourses[i][2] = schedule.get(i).getTitle();
+			Activity a = schedule.get(i);
+			getScheduledActivities[i][0] = a.getShortDisplayArray()[0];
+			getScheduledActivities[i][1] = a.getShortDisplayArray()[1];
+			getScheduledActivities[i][2] = a.getShortDisplayArray()[2];
+			getScheduledActivities[i][3] = a.getShortDisplayArray()[3];
+
 		}
-		return getScheduledCourses;
+		return getScheduledActivities;
 	}
 
 	/**
@@ -92,17 +106,22 @@ public class WolfScheduler {
 	 * @return A 2D array where each row represents a scheduled course with columns
 	 *         for name, section, and title.
 	 */
-	public String[][] getFullScheduledCourses() {
+	public String[][] getFullScheduledActivities() {
 
-		String[][] getFullScheduledCourses = new String[schedule.size()][6];
+		String[][] getFullScheduledCourses = new String[schedule.size()][7];
+
 		for (int i = 0; i < schedule.size(); i++) {
-			getFullScheduledCourses[i][0] = schedule.get(i).getName();
-			getFullScheduledCourses[i][1] = schedule.get(i).getSection();
-			getFullScheduledCourses[i][2] = schedule.get(i).getTitle();
-			getFullScheduledCourses[i][3] = schedule.get(i).getCredits() + "";
-			getFullScheduledCourses[i][4] = schedule.get(i).getInstructorId();
-			getFullScheduledCourses[i][5] = schedule.get(i).getMeetingString();
+			Activity a = schedule.get(i);
+			getFullScheduledCourses[i][0] = a.getLongDisplayArray()[0];
+			getFullScheduledCourses[i][1] = a.getLongDisplayArray()[1];
+			getFullScheduledCourses[i][2] = a.getLongDisplayArray()[2];
+			getFullScheduledCourses[i][3] = a.getLongDisplayArray()[3];
+			getFullScheduledCourses[i][4] = a.getLongDisplayArray()[4];
+			getFullScheduledCourses[i][5] = a.getLongDisplayArray()[5];
+			getFullScheduledCourses[i][6] = a.getLongDisplayArray()[6];
+
 		}
+
 		return getFullScheduledCourses;
 	}
 
@@ -117,14 +136,17 @@ public class WolfScheduler {
 	}
 
 	/**
-	 * exports the schedule using writeCourseRecords()
-	 * 
-	 * @param fileName the file name
+	 * Exports the schedule of activities to a file.
+	 *
+	 * @param fileName The name of the file to which the schedule of activities will
+	 *                 be exported.
+	 * @throws IllegalArgumentException If an I/O error occurs while writing to the
+	 *                                  file.
 	 */
 	public void exportSchedule(String fileName) {
 
 		try {
-			CourseRecordIO.writeCourseRecords(fileName, schedule);
+			ActivityRecordIO.writeActivityRecords(fileName, schedule);
 		} catch (IOException e) {
 			throw new IllegalArgumentException("The file cannot be saved.");
 		}
@@ -149,64 +171,58 @@ public class WolfScheduler {
 	}
 
 	/**
-	 * a true or false statement to whether or not you can add a course to your
-	 * schedule
-	 * 
-	 * @param name    course name
-	 * @param section section number
+	 * Adds a course to the schedule based on its name and section.
 	 *
-	 * @return false if null | true if not already enrolled
-	 * 
-	 * @throws IllegalArgumentException if already enrolled
-	 * 
-	 * 
+	 * @param name    The name of the course to be added to the schedule.
+	 * @param section The section of the course to be added to the schedule.
+	 * @return true if the course was successfully added to the schedule, false if
+	 *         the course was not found in the catalog.
+	 * @throws IllegalArgumentException If the course with the same name and section
+	 *                                  is already in the schedule.
 	 */
 	public boolean addCourseToSchedule(String name, String section) {
 
-		Course addCourseToSchedule = getCourseFromCatalog(name, section);
-		if (addCourseToSchedule == null) {
+		Course courseAdded = getCourseFromCatalog(name, section);
+		if (courseAdded == null) {
 			return false;
 		}
 		for (int i = 0; i < schedule.size(); i++) {
-			if (schedule.get(i).getName().equals(name)) {
-				throw new IllegalArgumentException("You are already enrolled in " + name);
+			if (schedule.get(i).isDuplicate(courseAdded)) {
+				throw new IllegalArgumentException("You are already enrolled in " + courseAdded.getName());
 			}
 		}
-		schedule.add(addCourseToSchedule);
+		schedule.add(courseAdded);
 		return true;
 	}
 
 	/**
 	 * gets index of name and section of the course you want removed and removes it
 	 * 
-	 * @param name    course name
-	 * @param section section number
-	 *
+	 * @param idx index of the activity to be removed
+	 * 
 	 * @return false if it did not remove
 	 * 
 	 * 
 	 * 
 	 */
-	public boolean removeCourseFromSchedule(String name, String section) {
+	public boolean removeActivityFromSchedule(int idx) {
 
-		for (int i = 0; i < schedule.size(); i++) {
-			if (schedule.get(i).getName().equals(name) && schedule.get(i).getSection().equals(section)) {
-				schedule.remove(schedule.get(i));
-				return true;
-			}
+		if (schedule.size() > idx) {
+			schedule.remove(idx);
+			return true;
 		}
 		return false;
 	}
 
 	/**
-	 * checks if title is null
-	 * 
-	 * @param title schedule title
+	 * Sets the title for the schedule.
 	 *
+	 * @param title The title to be set for the schedule. It should not be null.
+	 * @throws IllegalArgumentException If the provided title is null.
 	 */
 	public void setScheduleTitle(String title) {
 
-		if (title == null /* || title.length() < 0 || title.isEmpty() */ ) {
+		if (title == null) {
 			throw new IllegalArgumentException("Title cannot be null.");
 		}
 
@@ -219,8 +235,36 @@ public class WolfScheduler {
 	 */
 	public void resetSchedule() {
 
-		schedule = new ArrayList<Course>();
+		schedule = new ArrayList<Activity>();
 
+	}
+
+	/**
+	 * Adds an event to the schedule with the specified details.
+	 *
+	 * @param eventTitle       The title of the event to be added to the schedule.
+	 * @param eventMeetingDays The days on which the event occurs, represented as a
+	 *                         string.
+	 * @param eventStartTime   The start time of the event in the format HHMM (e.g.,
+	 *                         0930 for 9:30 AM).
+	 * @param eventEndTime     The end time of the event in the format HHMM (e.g.,
+	 *                         1430 for 2:30 PM).
+	 * @param eventDetails     Additional details or description of the event.
+	 * @throws IllegalArgumentException If an event with the same title already
+	 *                                  exists in the schedule or if the provided
+	 *                                  event details are null.
+	 */
+	public void addEventToSchedule(String eventTitle, String eventMeetingDays, int eventStartTime, int eventEndTime,
+			String eventDetails) {
+		Event eventToAdd = new Event(eventTitle, eventMeetingDays, eventStartTime, eventEndTime, eventDetails);
+
+		for (int i = 0; i < schedule.size(); i++) {
+			if (schedule.get(i).isDuplicate(eventToAdd) || eventToAdd == null) {
+				throw new IllegalArgumentException("You have already created an event called " + eventToAdd.getTitle());
+			}
+		}
+
+		schedule.add(eventToAdd);
 	}
 
 }

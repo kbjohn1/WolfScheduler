@@ -12,12 +12,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Scanner;
 
+import edu.ncsu.csc216.wolf_scheduler.course.Activity;
 import edu.ncsu.csc216.wolf_scheduler.course.Course;
 
 /**
  * Tests the WolfScheduler class.
  * 
  * @author Sarah Heckman
+ * 
  */
 public class WolfSchedulerTest {
 	
@@ -42,6 +44,17 @@ public class WolfSchedulerTest {
 	private static final int START_TIME = 1330;
 	/** Course end time */
 	private static final int END_TIME = 1445;
+	
+	/** Event title */
+	private static final String EVENT_TITLE = "Exercise";
+	/** Event meeting days */
+	private static final String EVENT_MEETING_DAYS = "MTWHF";
+	/** Event start time */
+	private static final int EVENT_START_TIME = 800;
+	/** Event end time */
+	private static final int EVENT_END_TIME = 900;
+	/** Event details */
+	private static final String EVENT_DETAILS = "Cardio Time!";
 
 	/**
 	 * Resets course_records.txt for use in other tests.
@@ -67,8 +80,8 @@ public class WolfSchedulerTest {
 		//Test with invalid file.  Should have an empty catalog and schedule. 
 		WolfScheduler ws1 = new WolfScheduler(invalidTestFile);
 		assertEquals(0, ws1.getCourseCatalog().length);
-		assertEquals(0, ws1.getScheduledCourses().length);
-		assertEquals(0, ws1.getFullScheduledCourses().length);
+		assertEquals(0, ws1.getScheduledActivities().length);
+		assertEquals(0, ws1.getFullScheduledActivities().length);
 		assertEquals("My Schedule", ws1.getScheduleTitle());
 		ws1.exportSchedule("test-files/actual_empty_export.txt");
 		checkFiles("test-files/expected_empty_export.txt", "test-files/actual_empty_export.txt");
@@ -89,7 +102,7 @@ public class WolfSchedulerTest {
 		assertNull(ws.getCourseFromCatalog("CSC 492", "001"));
 		
 		//Attempt to get a course that does exist
-		Course c = new Course(NAME, TITLE, SECTION, CREDITS, INSTRUCTOR_ID, MEETING_DAYS, START_TIME, END_TIME);
+		Activity c = new Course(NAME, TITLE, SECTION, CREDITS, INSTRUCTOR_ID, MEETING_DAYS, START_TIME, END_TIME);
 		assertEquals(c, ws.getCourseFromCatalog("CSC 216", "001"));
 	}
 	
@@ -97,27 +110,28 @@ public class WolfSchedulerTest {
 	 * Test WolfScheduler.addCourse().
 	 */
 	@Test
-	public void testAddCourse() {
+	public void testAddCourseToSchedule() {
 		WolfScheduler ws = new WolfScheduler(validTestFile);
 		
 		//Attempt to add a course that doesn't exist
 		assertFalse(ws.addCourseToSchedule("CSC 492", "001"));
-		assertEquals(0, ws.getScheduledCourses().length);
-		assertEquals(0, ws.getFullScheduledCourses().length);
+		assertEquals(0, ws.getScheduledActivities().length);
+		assertEquals(0, ws.getFullScheduledActivities().length);
 		
-		Course c = new Course(NAME, TITLE, SECTION, CREDITS, INSTRUCTOR_ID, MEETING_DAYS, START_TIME, END_TIME);
+		Activity c = new Course(NAME, TITLE, SECTION, CREDITS, INSTRUCTOR_ID, MEETING_DAYS, START_TIME, END_TIME);
 		
 		//Attempt to add a course that does exist
 		assertTrue(ws.addCourseToSchedule(NAME, SECTION));
-		assertEquals(1, ws.getScheduledCourses().length);
-		assertEquals(1, ws.getFullScheduledCourses().length);
-		String [] course = ws.getFullScheduledCourses()[0];
+		assertEquals(1, ws.getScheduledActivities().length);
+		assertEquals(1, ws.getFullScheduledActivities().length);
+		String [] course = ws.getFullScheduledActivities()[0];
 		assertEquals(NAME, course[0]);
 		assertEquals(SECTION, course[1]);
 		assertEquals(TITLE, course[2]);
 		assertEquals("" + CREDITS, course[3]);
 		assertEquals(INSTRUCTOR_ID, course[4]);
 		assertEquals(c.getMeetingString(), course[5]);
+		assertEquals("", course[6]);
 		
 		//Attempt to add a course that already exists, even if different section
 		try {
@@ -129,47 +143,82 @@ public class WolfSchedulerTest {
 	}
 	
 	/**
+	 * Test WolfScheduler.addEvent().
+	 */
+	@Test
+	public void testAddEventToSchedule() {
+		WolfScheduler ws = new WolfScheduler(validTestFile);
+		
+		ws.addEventToSchedule(EVENT_TITLE, EVENT_MEETING_DAYS, EVENT_START_TIME, EVENT_END_TIME, EVENT_DETAILS);
+	
+		assertEquals(1, ws.getScheduledActivities().length);
+		assertEquals(1, ws.getFullScheduledActivities().length);
+		String [] course = ws.getFullScheduledActivities()[0];
+		assertEquals("", course[0]);
+		assertEquals("", course[1]);
+		assertEquals(EVENT_TITLE, course[2]);
+		assertEquals("", course[3]);
+		assertEquals("", course[4]);
+		assertEquals("MTWHF 8:00AM-9:00AM", course[5]);
+		assertEquals(EVENT_DETAILS, course[6]);
+		
+		//Attempt to add an event with the same title
+		try {
+			ws.addEventToSchedule(EVENT_TITLE, EVENT_MEETING_DAYS, EVENT_START_TIME, EVENT_END_TIME, EVENT_DETAILS);
+			fail();
+		} catch (IllegalArgumentException e) {
+			assertEquals("You have already created an event called Exercise", e.getMessage());
+		}
+	}
+	
+	/**
 	 * Test WolfScheduler.removeCourse().
 	 */
 	@Test
-	public void testRemoveCourseFromSchedule() {
+	public void testRemoveActivityFromSchedule() {
 		WolfScheduler ws = new WolfScheduler(validTestFile);
 		
 		//Attempt to remove from empty schedule
-		assertFalse(ws.removeCourseFromSchedule(NAME, SECTION));
+		assertFalse(ws.removeActivityFromSchedule(0));
 		
 		//Add some courses and remove them
 		assertTrue(ws.addCourseToSchedule(NAME, SECTION));
 		assertTrue(ws.addCourseToSchedule("CSC 226", "001"));
+		ws.addEventToSchedule(EVENT_TITLE, EVENT_MEETING_DAYS, EVENT_START_TIME, EVENT_END_TIME, EVENT_DETAILS);
 		assertTrue(ws.addCourseToSchedule("CSC 116", "002"));
-		assertEquals(3, ws.getScheduledCourses().length);
-		assertEquals(3, ws.getFullScheduledCourses().length);
+		assertEquals(4, ws.getScheduledActivities().length);
+		assertEquals(4, ws.getFullScheduledActivities().length);
 		
 		//Check that removing a course that doesn't exist when there are 
 		//scheduled courses doesn't break anything
-		assertFalse(ws.removeCourseFromSchedule("CSC 492", "001"));
-		assertEquals(3, ws.getScheduledCourses().length);
-		assertEquals(3, ws.getFullScheduledCourses().length);
+		assertFalse(ws.removeActivityFromSchedule(5));
+		assertEquals(4, ws.getScheduledActivities().length);
+		assertEquals(4, ws.getFullScheduledActivities().length);
+		
+		//Remove Exercise
+		assertTrue(ws.removeActivityFromSchedule(1));
+		assertEquals(3, ws.getScheduledActivities().length);
+		assertEquals(3, ws.getFullScheduledActivities().length);
 		
 		//Remove CSC226
-		assertTrue(ws.removeCourseFromSchedule("CSC 226", "001"));
-		assertEquals(2, ws.getScheduledCourses().length);
-		assertEquals(2, ws.getFullScheduledCourses().length);
+		assertTrue(ws.removeActivityFromSchedule(1));
+		assertEquals(2, ws.getScheduledActivities().length);
+		assertEquals(2, ws.getFullScheduledActivities().length);
 		
 		//Remove CSC116
-		assertTrue(ws.removeCourseFromSchedule("CSC 116", "002"));
-		assertEquals(1, ws.getScheduledCourses().length);
-		assertEquals(1, ws.getFullScheduledCourses().length);
+		assertTrue(ws.removeActivityFromSchedule(1));
+		assertEquals(1, ws.getScheduledActivities().length);
+		assertEquals(1, ws.getFullScheduledActivities().length);
 		
 		//Remove CSC216
-		assertTrue(ws.removeCourseFromSchedule(NAME, SECTION));
-		assertEquals(0, ws.getScheduledCourses().length);
-		assertEquals(0, ws.getFullScheduledCourses().length);
+		assertTrue(ws.removeActivityFromSchedule(0));
+		assertEquals(0, ws.getScheduledActivities().length);
+		assertEquals(0, ws.getFullScheduledActivities().length);
 		
 		//Check that removing all doesn't break future adds
 		assertTrue(ws.addCourseToSchedule("CSC 230", "001"));
-		assertEquals(1, ws.getScheduledCourses().length);
-		assertEquals(1, ws.getFullScheduledCourses().length);
+		assertEquals(1, ws.getScheduledActivities().length);
+		assertEquals(1, ws.getFullScheduledActivities().length);
 	}
 	
 	/**
@@ -183,17 +232,17 @@ public class WolfSchedulerTest {
 		assertTrue(ws.addCourseToSchedule(NAME, SECTION));
 		assertTrue(ws.addCourseToSchedule("CSC 226", "001"));
 		assertTrue(ws.addCourseToSchedule("CSC 116", "002"));
-		assertEquals(3, ws.getScheduledCourses().length);
-		assertEquals(3, ws.getFullScheduledCourses().length);
+		assertEquals(3, ws.getScheduledActivities().length);
+		assertEquals(3, ws.getFullScheduledActivities().length);
 		
 		ws.resetSchedule();
-		assertEquals(0, ws.getScheduledCourses().length);
-		assertEquals(0, ws.getFullScheduledCourses().length);
+		assertEquals(0, ws.getScheduledActivities().length);
+		assertEquals(0, ws.getFullScheduledActivities().length);
 		
 		//Check that resetting doesn't break future adds
 		assertTrue(ws.addCourseToSchedule("CSC 230", "001"));
-		assertEquals(1, ws.getScheduledCourses().length);
-		assertEquals(1, ws.getFullScheduledCourses().length);
+		assertEquals(1, ws.getScheduledActivities().length);
+		assertEquals(1, ws.getFullScheduledActivities().length);
 	}
 	
 	/**
@@ -264,44 +313,54 @@ public class WolfSchedulerTest {
 	 * Test WolfScheduler.getScheduledCourses().
 	 */
 	@Test
-	public void testGetScheduledCourses() {
+	public void testGetScheduledActivities() {
 		WolfScheduler ws = new WolfScheduler(validTestFile);
 		
 		//Add some courses and get schedule
 		//Name, section, title
 		assertTrue(ws.addCourseToSchedule(NAME, SECTION));
 		assertTrue(ws.addCourseToSchedule("CSC 226", "001"));
+		ws.addEventToSchedule("Lunch", "MWF", 1200, 1300, "Food");
 		assertTrue(ws.addCourseToSchedule("CSC 116", "002"));
 		
-		String [][] schedule = ws.getScheduledCourses();
+		String [][] schedule = ws.getScheduledActivities();
 		//Row 1
 		assertEquals("CSC 216", schedule[0][0]);
 		assertEquals("001", schedule[0][1]);
 		assertEquals("Software Development Fundamentals", schedule[0][2]);
+		assertEquals("TH 1:30PM-2:45PM", schedule[0][3]);
 		//Row 1
 		assertEquals("CSC 226", schedule[1][0]);
 		assertEquals("001", schedule[1][1]);
 		assertEquals("Discrete Mathematics for Computer Scientists", schedule[1][2]);
+		assertEquals("MWF 9:35AM-10:25AM", schedule[1][3]);
 		//Row 2
-		assertEquals("CSC 116", schedule[2][0]);
-		assertEquals("002", schedule[2][1]);
-		assertEquals("Intro to Programming - Java", schedule[2][2]);
+		assertEquals("", schedule[2][0]);
+		assertEquals("", schedule[2][1]);
+		assertEquals("Lunch", schedule[2][2]);
+		assertEquals("MWF 12:00PM-1:00PM", schedule[2][3]);
+		//Row 3
+		assertEquals("CSC 116", schedule[3][0]);
+		assertEquals("002", schedule[3][1]);
+		assertEquals("Intro to Programming - Java", schedule[3][2]);
+		assertEquals("MW 11:20AM-1:10PM", schedule[3][3]);
 	}
 	
 	/**
 	 * Test WolfScheduler.getFullScheduledCourses()
 	 */
 	@Test
-	public void testGetFullScheduledCourses() {
+	public void testGetFullScheduledActivities() {
 		WolfScheduler ws = new WolfScheduler(validTestFile);
 		
 		//Add some courses and get full schedule
 		//Name, section, title, credits, instructor id, meeting string
 		assertTrue(ws.addCourseToSchedule(NAME, SECTION));
 		assertTrue(ws.addCourseToSchedule("CSC 226", "001"));
+		ws.addEventToSchedule("Lunch", "MWF", 1200, 1300, "Food");
 		assertTrue(ws.addCourseToSchedule("CSC 116", "002"));
 		
-		String [][] schedule = ws.getFullScheduledCourses();
+		String [][] schedule = ws.getFullScheduledActivities();
 		//Row 1
 		assertEquals("CSC 216", schedule[0][0]);
 		assertEquals("001", schedule[0][1]);
@@ -309,6 +368,7 @@ public class WolfSchedulerTest {
 		assertEquals("3", schedule[0][3]);
 		assertEquals("sesmith5", schedule[0][4]);
 		assertEquals("TH 1:30PM-2:45PM", schedule[0][5]);
+		assertEquals("", schedule[0][6]);
 		//Row 1
 		assertEquals("CSC 226", schedule[1][0]);
 		assertEquals("001", schedule[1][1]);
@@ -316,13 +376,23 @@ public class WolfSchedulerTest {
 		assertEquals("3", schedule[1][3]);
 		assertEquals("tmbarnes", schedule[1][4]);
 		assertEquals("MWF 9:35AM-10:25AM", schedule[1][5]);
+		assertEquals("", schedule[1][6]);
 		//Row 2
-		assertEquals("CSC 116", schedule[2][0]);
-		assertEquals("002", schedule[2][1]);
-		assertEquals("Intro to Programming - Java", schedule[2][2]);
-		assertEquals("3", schedule[2][3]);
-		assertEquals("spbalik", schedule[2][4]);
-		assertEquals("MW 11:20AM-1:10PM", schedule[2][5]);
+		assertEquals("", schedule[2][0]);
+		assertEquals("", schedule[2][1]);
+		assertEquals("Lunch", schedule[2][2]);
+		assertEquals("", schedule[2][3]);
+		assertEquals("", schedule[2][4]);
+		assertEquals("MWF 12:00PM-1:00PM", schedule[2][5]);
+		assertEquals("Food", schedule[2][6]);
+		//Row 3
+		assertEquals("CSC 116", schedule[3][0]);
+		assertEquals("002", schedule[3][1]);
+		assertEquals("Intro to Programming - Java", schedule[3][2]);
+		assertEquals("3", schedule[3][3]);
+		assertEquals("spbalik", schedule[3][4]);
+		assertEquals("MW 11:20AM-1:10PM", schedule[3][5]);
+		assertEquals("", schedule[1][6]);
 	}
 	
 	/**
@@ -359,7 +429,7 @@ public class WolfSchedulerTest {
 		//Add courses and test that exports correctly
 		ws.addCourseToSchedule("CSC 216", "002");
 		ws.addCourseToSchedule("CSC 226", "001");
-		assertEquals(2, ws.getScheduledCourses().length);
+		assertEquals(2, ws.getScheduledActivities().length);
 		ws.exportSchedule("test-files/actual_schedule_export.txt");
 		checkFiles("test-files/expected_schedule_export.txt", "test-files/actual_schedule_export.txt");
 	}
